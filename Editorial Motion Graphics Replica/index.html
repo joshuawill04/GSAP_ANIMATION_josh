@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editorial Motion Graphics Replica</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    :root{
+      --bg1:#efefef;
+      --bg2:#cfcfcf;
+      --ink:#1f1f1f;
+      --wine:#6d223c;
+      --wine-soft:#8d3b59;
+      --shadow:rgba(0,0,0,.22);
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:#ddd;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    body{
+      display:grid;
+      place-items:center;
+    }
+
+    .stage{
+      position:relative;
+      width:min(420px,100vw);
+      height:100vh;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 50% 30%, #f4f4f4 0%, #d9d9d9 38%, #bbbbbb 78%, #a9a9a9 100%);
+      isolation:isolate;
+    }
+
+    .vignette{
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at center, transparent 45%, rgba(0,0,0,.1) 100%);
+      pointer-events:none;
+      z-index:20;
+    }
+
+    .arc{
+      position:absolute;
+      width:220%;
+      height:220%;
+      left:-65%;
+      top:-35%;
+      border-radius:50%;
+      border:28px solid rgba(0,0,0,.07);
+      transform:rotate(20deg);
+      filter:blur(.3px);
+      z-index:1;
+    }
+
+    .arc.a2{
+      width:180%;
+      height:180%;
+      left:-35%;
+      top:-10%;
+      border-width:22px;
+      opacity:.55;
+    }
+
+    .arc.a3{
+      width:145%;
+      height:145%;
+      left:8%;
+      top:10%;
+      border-width:18px;
+      opacity:.35;
+    }
+
+    .scene{
+      position:absolute;
+      inset:0;
+      opacity:0;
+      z-index:2;
+    }
+
+    .bg-word{
+      position:absolute;
+      left:22px;
+      top:72px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size:96px;
+      line-height:.9;
+      font-weight:800;
+      letter-spacing:-.06em;
+      color:rgba(109,34,60,.18);
+      text-transform:uppercase;
+      z-index:1;
+      pointer-events:none;
+    }
+
+    .copy{
+      position:absolute;
+      left:28px;
+      right:28px;
+      color:var(--ink);
+      z-index:4;
+    }
+
+    .copy.top{ top:86px; }
+    .copy.bottom{ bottom:82px; }
+
+    .eyebrow{
+      font-family: Georgia, "Times New Roman", serif;
+      font-size:20px;
+      color:#2d2d2d;
+      margin-bottom:2px;
+    }
+
+    .headline{
+      font-family: Georgia, "Times New Roman", serif;
+      font-size:58px;
+      line-height:.95;
+      color:var(--wine);
+      letter-spacing:-.05em;
+    }
+
+    .headline.small{
+      font-size:42px;
+    }
+
+    .sub{
+      font-family: Arial, Helvetica, sans-serif;
+      font-size:22px;
+      font-weight:700;
+      letter-spacing:-.03em;
+      color:#222;
+      margin-bottom:4px;
+    }
+
+    .hero{
+      position:absolute;
+      inset:auto;
+      z-index:3;
+      filter:drop-shadow(0 26px 28px rgba(0,0,0,.16));
+      transform-origin:center center;
+    }
+
+    .mask{
+      width:230px;
+      height:300px;
+      left:85px;
+      top:245px;
+      border-radius:45% 45% 42% 42% / 42% 42% 52% 52%;
+      background:
+        radial-gradient(circle at 38% 32%, rgba(255,255,255,.95) 0 8%, transparent 9%),
+        radial-gradient(circle at 62% 34%, rgba(255,255,255,.95) 0 8%, transparent 9%),
+        radial-gradient(circle at 50% 56%, rgba(110,30,52,.18) 0 6%, transparent 7%),
+        radial-gradient(circle at 50% 18%, rgba(255,255,255,.5), rgba(255,255,255,.08) 35%, rgba(120,30,60,.35) 80%, rgba(65,15,35,.9) 100%);
+      box-shadow: inset -18px -24px 36px rgba(0,0,0,.14);
+    }
+
+    .mask::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 52% 74%, rgba(255,255,255,.12), transparent 24%),
+        linear-gradient(90deg, transparent 0 62%, rgba(255,255,255,.06) 62% 64%, transparent 64%);
+      mix-blend-mode:screen;
+      opacity:.7;
+    }
+
+    .particle-field{
+      position:absolute;
+      right:-18px;
+      top:42px;
+      width:120px;
+      height:180px;
+      z-index:5;
+      pointer-events:none;
+    }
+
+    .particle{
+      position:absolute;
+      width:8px;
+      height:8px;
+      background:linear-gradient(180deg, #e6b6c5, #5c1933);
+      box-shadow:0 0 10px rgba(131,40,70,.22);
+      opacity:.85;
+    }
+
+    .profile{
+      width:250px;
+      height:460px;
+      right:-16px;
+      top:205px;
+      border-radius:55% 30% 35% 50% / 45% 35% 55% 50%;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.06), transparent 32%),
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,.02) 0 8px,
+          rgba(0,0,0,.08) 8px 10px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255,255,255,.02) 0 8px,
+          rgba(0,0,0,.08) 8px 10px
+        ),
+        radial-gradient(circle at 36% 25%, rgba(255,255,255,.12), transparent 18%),
+        linear-gradient(180deg, #8d2f4f 0%, #4b1327 100%);
+      clip-path: polygon(25% 0%, 90% 3%, 100% 22%, 99% 78%, 77% 100%, 28% 100%, 7% 84%, 0% 46%, 8% 16%);
+    }
+
+    .king{
+      width:120px;
+      height:250px;
+      left:150px;
+      top:410px;
+      background:
+        radial-gradient(circle at 50% 94%, rgba(255,255,255,.22), transparent 24%),
+        linear-gradient(180deg, #b15a78 0%, #6a203c 65%, #461126 100%);
+      clip-path: polygon(45% 0%, 55% 0%, 58% 8%, 66% 11%, 59% 16%, 64% 26%, 58% 33%, 62% 44%, 71% 84%, 30% 84%, 39% 44%, 43% 33%, 37% 26%, 42% 16%, 35% 11%, 43% 8%);
+      border-radius:10px;
+    }
+
+    .king::before{
+      content:"";
+      position:absolute;
+      left:38px;
+      top:-14px;
+      width:44px;
+      height:44px;
+      border-radius:50%;
+      background:linear-gradient(180deg, #c77794, #742742);
+    }
+
+    .king::after{
+      content:"";
+      position:absolute;
+      left:14px;
+      bottom:-10px;
+      width:92px;
+      height:36px;
+      border-radius:50%;
+      background:linear-gradient(180deg, #c77794, #5d1832);
+      box-shadow:0 10px 20px rgba(0,0,0,.18);
+    }
+
+    .eye{
+      width:118px;
+      height:118px;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 50% 50%, #1f1117 0 12%, #4f162c 13% 22%, #c885a0 23% 55%, #e7b1c4 56% 73%, #a24562 74% 86%, #f7dbe5 87% 100%);
+      box-shadow:
+        inset 0 0 14px rgba(0,0,0,.2),
+        0 18px 24px rgba(0,0,0,.16);
+    }
+
+    .eye.main{
+      left:151px;
+      top:540px;
+      position:absolute;
+      z-index:3;
+    }
+
+    .eye.small1{
+      left:-24px;
+      top:102px;
+      transform:scale(.6);
+      position:absolute;
+      z-index:2;
+      opacity:.9;
+      filter:blur(.2px);
+    }
+
+    .eye.small2{
+      right:-22px;
+      bottom:30px;
+      transform:scale(.72);
+      position:absolute;
+      z-index:2;
+      opacity:.88;
+      filter:blur(.25px);
+    }
+
+    .red-x{
+      position:absolute;
+      left:108px;
+      top:285px;
+      width:180px;
+      height:180px;
+      z-index:5;
+    }
+
+    .red-x::before,
+    .red-x::after{
+      content:"";
+      position:absolute;
+      left:84px;
+      top:0;
+      width:12px;
+      height:180px;
+      border-radius:10px;
+      background:linear-gradient(180deg,#ff3f52,#b60f21);
+      box-shadow:0 0 16px rgba(255,60,85,.28);
+    }
+
+    .red-x::before{ transform:rotate(47deg); }
+    .red-x::after{ transform:rotate(-47deg); }
+
+    .portrait{
+      position:absolute;
+      left:102px;
+      top:260px;
+      width:220px;
+      height:360px;
+      z-index:3;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255,255,255,.18), transparent 18%),
+        linear-gradient(180deg, #8a6c73 0%, #3a232b 36%, #26181d 100%);
+      clip-path: polygon(46% 0%, 60% 2%, 67% 11%, 70% 21%, 83% 30%, 87% 49%, 81% 73%, 71% 100%, 31% 100%, 20% 73%, 15% 47%, 20% 31%, 33% 21%, 35% 10%);
+      opacity:.92;
+    }
+
+    .portrait::after{
+      content:"";
+      position:absolute;
+      left:57px;
+      bottom:-2px;
+      width:110px;
+      height:178px;
+      background:linear-gradient(180deg,#3f242d,#1f1318);
+      clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+    }
+
+    .blur-shape{
+      position:absolute;
+      width:110px;
+      height:110px;
+      border-radius:50%;
+      background:radial-gradient(circle at 35% 35%, rgba(255,255,255,.9), rgba(118,19,53,.4) 42%, rgba(47,10,23,.15) 66%, transparent 70%);
+      filter:blur(7px);
+      opacity:.72;
+      z-index:6;
+      mix-blend-mode:screen;
+    }
+
+    .blur-left{ left:-28px; top:34px; }
+    .blur-right{ right:-16px; bottom:250px; width:120px; height:120px; }
+
+    .line{
+      position:absolute;
+      height:2px;
+      background:rgba(0,0,0,.32);
+      transform-origin:left center;
+      z-index:3;
+    }
+    .line.l1{ left:42px; top:646px; width:160px; transform:rotate(-46deg); }
+    .line.l2{ left:234px; top:650px; width:150px; transform:rotate(42deg); }
+
+    .corner{
+      position:absolute;
+      width:18px;
+      height:18px;
+      border:2px solid rgba(0,0,0,.25);
+      z-index:3;
+    }
+    .corner.c1{ left:84px; top:618px; border-right:none; border-bottom:none; }
+    .corner.c2{ right:76px; top:618px; border-left:none; border-bottom:none; }
+
+    .sans{
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight:800;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="arc a1"></div>
+    <div class="arc a2"></div>
+    <div class="arc a3"></div>
+
+    <div class="blur-shape blur-left"></div>
+    <div class="blur-shape blur-right"></div>
+
+    <!-- Scene 1 -->
+    <section class="scene scene-1">
+      <div class="bg-word">PEOPLE<br>DONT<br>BUY</div>
+      <div class="hero mask"></div>
+      <div class="particle-field"></div>
+    </section>
+
+    <!-- Scene 2 -->
+    <section class="scene scene-2">
+      <div class="portrait"></div>
+      <div class="red-x"></div>
+      <div class="copy bottom">
+        <div class="eyebrow">From</div>
+        <div class="headline">STRANGERS</div>
+      </div>
+    </section>
+
+    <!-- Scene 3 -->
+    <section class="scene scene-3">
+      <div class="hero mask" style="left:128px; top:355px; transform:scale(1.05)"></div>
+      <div class="particle-field particle-field-2"></div>
+      <div class="copy top">
+        <div class="eyebrow">from</div>
+        <div class="headline">Faces</div>
+      </div>
+      <div class="copy bottom">
+        <div class="sub">they</div>
+        <div class="headline small">recognize</div>
+      </div>
+    </section>
+
+    <!-- Scene 4 -->
+    <section class="scene scene-4">
+      <div class="hero profile"></div>
+      <div class="copy top" style="top:420px;">
+        <div class="sub">Rankkit turns</div>
+        <div class="headline small">Brands</div>
+      </div>
+    </section>
+
+    <!-- Scene 5 -->
+    <section class="scene scene-5">
+      <div class="hero profile" style="right:-20px; top:120px; transform:scale(1.2)"></div>
+      <div class="copy bottom">
+        <div class="sub">into</div>
+        <div class="headline small">Recognizable</div>
+        <div class="headline small" style="margin-top:-8px;">Identities</div>
+      </div>
+    </section>
+
+    <!-- Scene 6 -->
+    <section class="scene scene-6">
+      <div class="hero king"></div>
+      <div class="copy top" style="top:330px; text-align:center;">
+        <div class="sub">Through</div>
+        <div class="headline">Strategy</div>
+      </div>
+    </section>
+
+    <!-- Scene 7 -->
+    <section class="scene scene-7">
+      <div class="eye small1"></div>
+      <div class="eye small2"></div>
+      <div class="eye main"></div>
+      <div class="line l1"></div>
+      <div class="line l2"></div>
+      <div class="corner c1"></div>
+      <div class="corner c2"></div>
+      <div class="copy top" style="top:590px; left:172px;">
+        <div class="sub" style="font-size:18px;">Through</div>
+        <div class="headline small sans" style="font-size:24px; color:var(--wine);">Vision</div>
+      </div>
+    </section>
+
+    <div class="vignette"></div>
+  </div>
+
+  <script>
+    const particles1 = document.querySelector(".particle-field");
+    const particles2 = document.querySelector(".particle-field-2");
+
+    function spawnParticles(container, count = 45) {
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        const size = gsap.utils.random(4, 12, 1);
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+        p.style.left = `${gsap.utils.random(0, 100)}px`;
+        p.style.top = `${gsap.utils.random(0, 160)}px`;
+        p.style.opacity = gsap.utils.random(0.25, 0.95);
+        container.appendChild(p);
+      }
+    }
+
+    spawnParticles(particles1, 55);
+    spawnParticles(particles2, 42);
+
+    gsap.set(".scene-1", { opacity: 1 });
+
+    // Ambient continuous motion
+    gsap.to(".arc.a1", { rotate: 4, duration: 10, ease: "sine.inOut", yoyo: true, repeat: -1 });
+    gsap.to(".arc.a2", { rotate: -3, duration: 12, ease: "sine.inOut", yoyo: true, repeat: -1 });
+    gsap.to(".blur-left", { x: 14, y: 8, duration: 4.2, repeat: -1, yoyo: true, ease: "sine.inOut" });
+    gsap.to(".blur-right", { x: -10, y: -12, duration: 5.2, repeat: -1, yoyo: true, ease: "sine.inOut" });
+
+    gsap.to(".scene-1 .mask", { x: 10, y: -8, scale: 1.03, duration: 3.6, yoyo: true, repeat: -1, ease: "sine.inOut" });
+    gsap.to(".scene-3 .mask", { x: -6, y: 10, scale: 1.04, duration: 3.8, yoyo: true, repeat: -1, ease: "sine.inOut" });
+    gsap.to(".scene-4 .profile", { x: -8, duration: 3.5, yoyo: true, repeat: -1, ease: "sine.inOut" });
+    gsap.to(".scene-5 .profile", { y: -10, duration: 4.4, yoyo: true, repeat: -1, ease: "sine.inOut" });
+    gsap.to(".scene-6 .king", { y: -8, duration: 2.8, yoyo: true, repeat: -1, ease: "sine.inOut" });
+    gsap.to(".scene-7 .eye.main", { y: -8, scale: 1.03, duration: 3.2, yoyo: true, repeat: -1, ease: "sine.inOut" });
+
+    gsap.to(".particle-field .particle", {
+      x: () => gsap.utils.random(10, 85),
+      y: () => gsap.utils.random(-30, 35),
+      rotation: () => gsap.utils.random(-80, 80),
+      opacity: () => gsap.utils.random(0.1, 0.95),
+      duration: () => gsap.utils.random(1.4, 3.2),
+      stagger: { each: 0.03, repeat: -1, yoyo: true },
+      ease: "sine.inOut"
+    });
+
+    const tl = gsap.timeline({ repeat: -1, defaults: { ease: "power2.inOut" } });
+
+    // Scene 1
+    tl.from(".scene-1 .bg-word", { opacity: 0, y: 26, filter: "blur(10px)", duration: 0.9 })
+      .from(".scene-1 .mask", { opacity: 0, scale: 0.88, y: 34, filter: "blur(18px)", duration: 1.15 }, "-=0.55")
+      .from(".scene-1 .particle-field", { opacity: 0, x: -14, duration: 0.7 }, "-=0.7")
+      .to(".scene-1", { opacity: 0, duration: 0.45 }, "+=0.7")
+
+      // Scene 2
+      .set(".scene-2", { opacity: 1 })
+      .from(".scene-2 .portrait", { opacity: 0, y: 30, scale: 0.94, filter: "blur(16px)", duration: 0.9 })
+      .from(".scene-2 .red-x", { opacity: 0, scale: 0.6, rotation: -18, duration: 0.5 }, "-=0.25")
+      .from(".scene-2 .copy", { opacity: 0, y: 20, filter: "blur(8px)", duration: 0.7 }, "-=0.15")
+      .to(".scene-2", { opacity: 0, duration: 0.35 }, "+=0.45")
+
+      // Scene 3
+      .set(".scene-3", { opacity: 1 })
+      .from(".scene-3 .mask", { opacity: 0, x: 20, scale: 0.94, filter: "blur(14px)", duration: 0.9 })
+      .from(".scene-3 .particle-field-2", { opacity: 0, x: -12, duration: 0.6 }, "-=0.65")
+      .from(".scene-3 .copy.top", { opacity: 0, y: 22, filter: "blur(10px)", duration: 0.65 }, "-=0.45")
+      .from(".scene-3 .copy.bottom", { opacity: 0, y: 18, filter: "blur(10px)", duration: 0.65 }, "-=0.42")
+      .to(".scene-3", { opacity: 0, duration: 0.4 }, "+=0.55")
+
+      // Scene 4
+      .set(".scene-4", { opacity: 1 })
+      .from(".scene-4 .profile", { opacity: 0, x: 40, filter: "blur(14px)", duration: 0.9 })
+      .from(".scene-4 .copy", { opacity: 0, x: -20, filter: "blur(10px)", duration: 0.65 }, "-=0.55")
+      .to(".scene-4", { opacity: 0, duration: 0.35 }, "+=0.65")
+
+      // Scene 5
+      .set(".scene-5", { opacity: 1 })
+      .from(".scene-5 .profile", { opacity: 0, scale: 1.08, x: 20, filter: "blur(16px)", duration: 0.9 })
+      .from(".scene-5 .copy", { opacity: 0, y: 20, filter: "blur(10px)", duration: 0.7 }, "-=0.45")
+      .to(".scene-5", { opacity: 0, duration: 0.35 }, "+=0.75")
+
+      // Scene 6
+      .set(".scene-6", { opacity: 1 })
+      .from(".scene-6 .king", { opacity: 0, y: 40, scale: 0.85, filter: "blur(16px)", duration: 0.9 })
+      .from(".scene-6 .copy", { opacity: 0, y: 16, filter: "blur(8px)", duration: 0.65 }, "-=0.4")
+      .to(".scene-6", { opacity: 0, duration: 0.35 }, "+=0.6")
+
+      // Scene 7
+      .set(".scene-7", { opacity: 1 })
+      .from(".scene-7 .eye.main", { opacity: 0, scale: 0.84, y: 24, filter: "blur(14px)", duration: 0.9 })
+      .from(".scene-7 .eye.small1, .scene-7 .eye.small2", { opacity: 0, scale: 0.6, stagger: 0.08, duration: 0.5 }, "-=0.55")
+      .from(".scene-7 .line, .scene-7 .corner", { opacity: 0, scaleX: 0, transformOrigin: "left center", stagger: 0.05, duration: 0.45 }, "-=0.4")
+      .from(".scene-7 .copy", { opacity: 0, y: 10, duration: 0.5 }, "-=0.2")
+      .to(".scene-7", { opacity: 0, duration: 0.45 }, "+=0.85");
+  </script>
+</body>
+</html>
