@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cinematic Infinite Horizontal Image Carousel</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    :root {
+      --shadow-soft: 0 16px 40px rgba(0,0,0,0.12);
+      --shadow-strong: 0 26px 60px rgba(0,0,0,0.18);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(180deg, #efefef 0%, #e6e6e6 100%);
+      font-family: Inter, sans-serif;
+    }
+
+    .scene {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      perspective: 1800px;
+      overflow: hidden;
+    }
+
+    .ambient-glow {
+      position: absolute;
+      width: 58vw;
+      height: 22vw;
+      min-width: 500px;
+      min-height: 200px;
+      border-radius: 999px;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.65), rgba(255,255,255,0) 70%);
+      filter: blur(30px);
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    .carousel {
+      position: relative;
+      width: min(1100px, 92vw);
+      height: min(620px, 82vh);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-style: preserve-3d;
+    }
+
+    .card {
+      position: absolute;
+      width: min(370px, 34vw);
+      aspect-ratio: 0.74 / 1;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #fff;
+      transform-style: preserve-3d;
+      box-shadow: var(--shadow-soft);
+      will-change: transform, opacity, filter;
+      backface-visibility: hidden;
+      transform-origin: center center;
+    }
+
+    .card-media {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.02);
+      will-change: transform;
+    }
+
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.05));
+      pointer-events: none;
+    }
+
+    .card-shine {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        115deg,
+        transparent 0%,
+        rgba(255,255,255,0.00) 28%,
+        rgba(255,255,255,0.18) 44%,
+        rgba(255,255,255,0.00) 62%,
+        transparent 100%
+      );
+      mix-blend-mode: screen;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .card {
+        width: min(320px, 52vw);
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="scene">
+    <div class="ambient-glow"></div>
+
+    <div class="carousel">
+      <article class="card card-left">
+        <div class="card-media"></div>
+        <div class="card-overlay"></div>
+        <div class="card-shine"></div>
+      </article>
+
+      <article class="card card-center">
+        <div class="card-media"></div>
+        <div class="card-overlay"></div>
+        <div class="card-shine"></div>
+      </article>
+
+      <article class="card card-right">
+        <div class="card-media"></div>
+        <div class="card-overlay"></div>
+        <div class="card-shine"></div>
+      </article>
+    </div>
+  </section>
+
+  <script>
+    const items = [
+      { image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80" },
+      { image: "https://images.unsplash.com/photo-1519947486511-46149fa0a254?auto=format&fit=crop&w=1200&q=80" },
+      { image: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80" },
+      { image: "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=80" },
+      { image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80" },
+      { image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80" }
+    ];
+
+    const slots = {
+      left: {
+        x: -310,
+        y: 8,
+        scale: 0.9,
+        rotationY: 28,
+        rotationZ: -1.8,
+        opacity: 0.7,
+        filter: "blur(1.8px)",
+        zIndex: 2,
+        boxShadow: "0 16px 40px rgba(0,0,0,0.12)"
+      },
+      center: {
+        x: 0,
+        y: 0,
+        scale: 1,
+        rotationY: 0,
+        rotationZ: 0,
+        opacity: 1,
+        filter: "blur(0px)",
+        zIndex: 5,
+        boxShadow: "0 26px 60px rgba(0,0,0,0.18)"
+      },
+      right: {
+        x: 310,
+        y: 8,
+        scale: 0.9,
+        rotationY: -28,
+        rotationZ: 1.8,
+        opacity: 0.7,
+        filter: "blur(1.8px)",
+        zIndex: 2,
+        boxShadow: "0 16px 40px rgba(0,0,0,0.12)"
+      },
+      farRight: {
+        x: 520,
+        y: 18,
+        scale: 0.8,
+        rotationY: -38,
+        rotationZ: 2.4,
+        opacity: 0,
+        filter: "blur(8px)"
+      },
+      farLeft: {
+        x: -520,
+        y: 18,
+        scale: 0.8,
+        rotationY: 38,
+        rotationZ: -2.4,
+        opacity: 0,
+        filter: "blur(8px)"
+      }
+    };
+
+    let leftCard = document.querySelector(".card-left");
+    let centerCard = document.querySelector(".card-center");
+    let rightCard = document.querySelector(".card-right");
+
+    let current = 0;
+    let isAnimating = false;
+
+    function wrap(index) {
+      return (index + items.length) % items.length;
+    }
+
+    function setImage(card, item) {
+      card.querySelector(".card-media").style.backgroundImage = `url("${item.image}")`;
+    }
+
+    function applySlot(card, slot) {
+      gsap.set(card, slot);
+    }
+
+    function baseLayout() {
+      setImage(leftCard, items[wrap(current - 1)]);
+      setImage(centerCard, items[wrap(current)]);
+      setImage(rightCard, items[wrap(current + 1)]);
+
+      applySlot(leftCard, slots.left);
+      applySlot(centerCard, slots.center);
+      applySlot(rightCard, slots.right);
+    }
+
+    function intro() {
+      baseLayout();
+
+      gsap.from([leftCard, centerCard, rightCard], {
+        y: "+=40",
+        opacity: 0,
+        scale: 0.94,
+        filter: "blur(10px)",
+        stagger: 0.08,
+        duration: 1.15,
+        ease: "power3.out"
+      });
+
+      gsap.to(".ambient-glow", {
+        scaleX: 1.05,
+        scaleY: 1.1,
+        duration: 4,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+
+      gsap.to(centerCard.querySelector(".card-shine"), {
+        xPercent: 16,
+        duration: 4,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+    }
+
+    function next() {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      const nextIndex = wrap(current + 1);
+      const incomingIndex = wrap(current + 2);
+
+      // recycle current left card as incoming far-right card before timeline starts
+      const recycled = leftCard;
+      setImage(recycled, items[incomingIndex]);
+      applySlot(recycled, { ...slots.farRight, zIndex: 1 });
+
+      gsap.set(centerCard, { zIndex: 5 });
+      gsap.set(rightCard, { zIndex: 4 });
+      gsap.set(recycled, { zIndex: 1 });
+
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.inOut" },
+        onComplete: () => {
+          current = nextIndex;
+
+          // rotate references only after positions are already correct
+          const oldLeft = leftCard;
+          leftCard = centerCard;
+          centerCard = rightCard;
+          rightCard = oldLeft;
+
+          gsap.set(leftCard, { zIndex: slots.left.zIndex });
+          gsap.set(centerCard, { zIndex: slots.center.zIndex });
+          gsap.set(rightCard, { zIndex: slots.right.zIndex });
+
+          // keep center shine alive on new center
+          gsap.killTweensOf(".card-shine");
+          gsap.to(centerCard.querySelector(".card-shine"), {
+            xPercent: 16,
+            duration: 4,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut"
+          });
+
+          isAnimating = false;
+        }
+      });
+
+      tl.to(centerCard, {
+        ...slots.left,
+        duration: 1.1
+      }, 0);
+
+      tl.to(rightCard, {
+        ...slots.center,
+        duration: 1.1
+      }, 0);
+
+      tl.to(recycled, {
+        ...slots.right,
+        duration: 1.1
+      }, 0);
+
+      tl.fromTo(rightCard.querySelector(".card-media"),
+        { scale: 1.06 },
+        { scale: 1.02, duration: 1.1, ease: "expo.out" },
+        0
+      );
+    }
+
+    intro();
+
+    gsap.delayedCall(2.5, function loop() {
+      next();
+      gsap.delayedCall(2.35, loop);
+    });
+
+    document.addEventListener("click", next);
+  </script>
+</body>
+</html>
