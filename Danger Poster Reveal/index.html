@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Danger Poster Reveal</title>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #050505;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.scene {
+  position: relative;
+  width: 430px;
+  height: 620px;
+  background: #050505;
+  overflow: hidden;
+}
+
+/*
+ONLY THE IMAGE TILTS
+TEXT DOES NOT TILT
+*/
+
+.image-wrap {
+  position: absolute;
+  left: -2%;
+  top: 4%;
+  width: 72%;
+  height: 90%;
+  z-index: 1;
+  overflow: hidden;
+
+  opacity: 0;
+  transform: translateX(-70px) scale(1.08);
+  filter: blur(12px);
+
+  transform-style: preserve-3d;
+  transform-origin: center center;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+
+  /*
+  using the previous working image source
+  that rendered correctly in CodePen
+  */
+
+  filter:
+    hue-rotate(42deg)
+    saturate(1.45)
+    contrast(1.08)
+    brightness(0.80);
+}
+
+.image-mask {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,0,0,0.08) 0%,
+      rgba(0,0,0,0.35) 42%,
+      rgba(0,0,0,0.72) 100%
+    );
+  z-index: 2;
+}
+
+/*
+TEXT FIXED:
+no cut-off
+wider container
+better spacing
+*/
+.text-wrap {
+  position: absolute;
+  right: 2%;
+  top: 7%;
+  width: 52%;
+  z-index: 5;
+}
+
+.word {
+  font-family: "Anton", sans-serif;
+  font-size: 4.8rem;
+  line-height: 0.90;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: #b8ff18;
+
+  opacity: 0;
+  transform: translateY(60px);
+
+  text-shadow:
+    0 0 10px rgba(184,255,24,0.06);
+}
+
+.word.offset {
+  margin-left: 1rem;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at center,
+      transparent 42%,
+      rgba(0,0,0,0.14) 72%,
+      rgba(0,0,0,0.30) 100%
+    );
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.02) 0px,
+      rgba(255,255,255,0.02) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+}
+</style>
+</head>
+<body>
+
+<div class="scene">
+
+  <!-- ONLY IMAGE TILTS -->
+  <div class="image-wrap">
+    <img
+      class="image"
+      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80"
+      alt="Main portrait asset"
+    />
+    <div class="image-mask"></div>
+  </div>
+
+  <!-- TEXT -->
+  <div class="text-wrap">
+    <div class="word">I AM</div>
+    <div class="word offset">THE</div>
+    <div class="word">DANGER</div>
+  </div>
+
+  <div class="vignette"></div>
+  <div class="grain"></div>
+
+</div>
+
+<script>
+const tl = gsap.timeline({
+  defaults: {
+    ease: "power3.out"
+  }
+});
+
+/*
+SEQUENCE
+
+1. image enters first
+2. image gets premium tilt settle
+3. text reveals over image
+4. subtle idle tilt only on image
+*/
+
+tl.fromTo(".image-wrap",
+  {
+    rotateY: -14,
+    rotateX: 8,
+    rotateZ: -2,
+    x: -70,
+    scale: 1.08,
+    opacity: 0,
+    filter: "blur(14px)"
+  },
+  {
+    rotateY: 0,
+    rotateX: 0,
+    rotateZ: 0,
+    x: 0,
+    scale: 1,
+    opacity: 1,
+    filter: "blur(0px)",
+    duration: 1.2,
+    ease: "power4.out"
+  }
+);
+
+tl.to(".word", {
+  opacity: 1,
+  y: 0,
+  duration: 0.48,
+  stagger: 0.10,
+  ease: "power4.out"
+}, "-=0.45");
+
+/*
+subtle premium idle tilt
+ONLY IMAGE
+*/
+
+gsap.to(".image-wrap", {
+  rotateY: 2,
+  rotateX: -1,
+  duration: 2.8,
+  ease: "sine.inOut",
+  yoyo: true,
+  repeat: -1
+});
+
+gsap.to(".grain", {
+  opacity: 0.08,
+  duration: 0.45,
+  repeat: -1,
+  yoyo: true,
+  ease: "sine.inOut"
+});
+</script>
+
+</body>
+</html>
