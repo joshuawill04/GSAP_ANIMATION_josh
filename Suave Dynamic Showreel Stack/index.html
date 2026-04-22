@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suave Dynamic Showreel Stack</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    :root {
+      --bg0: #02050b;
+      --bg1: #07111f;
+      --bg2: #0b1f3b;
+
+      --card-dark: #070b14;
+      --card-light: #f6f9ff;
+
+      --line-blue: rgba(79, 132, 255, 0.58);
+      --line-soft: rgba(110, 150, 255, 0.12);
+
+      --blue-a: #58a8ff;
+      --blue-b: #2f6dff;
+      --blue-c: #1249d3;
+
+      --shadow-dark: 0 18px 42px rgba(0, 0, 0, 0.28);
+      --shadow-light: 0 14px 30px rgba(0, 0, 0, 0.14);
+
+      --radius: 30px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 16%, rgba(48, 108, 255, 0.14), transparent 18%),
+        linear-gradient(180deg, var(--bg2) 0%, var(--bg1) 34%, var(--bg0) 100%);
+      font-family: Inter, system-ui, sans-serif;
+    }
+
+    .scene {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .back-orb {
+      position: absolute;
+      left: 50%;
+      top: 48%;
+      width: min(52vw, 360px);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(45, 108, 255, 0.16) 0%, rgba(45, 108, 255, 0.06) 38%, transparent 70%);
+      z-index: 0;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    .frame {
+      position: absolute;
+      inset: 10% 16%;
+      border-radius: 40px;
+      border: 1px solid rgba(96, 143, 255, 0.08);
+      z-index: 0;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    .spark {
+      position: absolute;
+      left: 50%;
+      top: 10.5%;
+      width: 18px;
+      height: 28px;
+      transform: translateX(-50%);
+      z-index: 6;
+      opacity: 0.96;
+      will-change: transform;
+    }
+
+    .spark::before,
+    .spark::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 55% 55% 60% 60% / 34% 34% 68% 68%;
+    }
+
+    .spark::before {
+      background: linear-gradient(180deg, #fff4b7 0%, #ffc14e 44%, #ff7d30 100%);
+    }
+
+    .spark::after {
+      inset: 5px 4px 7px;
+      background: linear-gradient(180deg, #fffce6 0%, #ffe888 100%);
+    }
+
+    .deck {
+      position: relative;
+      width: min(86vw, 390px);
+      aspect-ratio: 9 / 16;
+      max-height: 94vh;
+      z-index: 2;
+      transform-style: preserve-3d;
+    }
+
+    .card {
+      position: absolute;
+      overflow: hidden;
+      border-radius: var(--radius);
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      will-change: transform, opacity;
+    }
+
+    .card.dark {
+      background: linear-gradient(180deg, #0a0f19 0%, #050913 100%);
+      border: 1px solid var(--line-blue);
+      box-shadow: var(--shadow-dark);
+    }
+
+    .card.light {
+      background: linear-gradient(180deg, #fbfdff 0%, #eef4ff 100%);
+      border: 1px solid rgba(255,255,255,0.78);
+      box-shadow: var(--shadow-light);
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent 28%, transparent 74%, rgba(255,255,255,0.03));
+    }
+
+    .card-a {
+      left: 8.5%;
+      top: 11%;
+      width: 45%;
+      height: 33.5%;
+      z-index: 3;
+    }
+
+    .card-b {
+      right: 8.5%;
+      top: 11%;
+      width: 45%;
+      height: 33.5%;
+      z-index: 3;
+    }
+
+    .card-c {
+      left: 21%;
+      bottom: 13%;
+      width: 58%;
+      height: 31.5%;
+      z-index: 4;
+    }
+
+    .slot {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      will-change: transform, opacity;
+    }
+
+    .slot-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      will-change: transform, opacity;
+    }
+
+    .asset,
+    .asset * {
+      box-sizing: border-box;
+    }
+
+    .asset {
+      position: absolute;
+      inset: 0;
+    }
+
+    .wave {
+      position: absolute;
+      left: -12%;
+      right: -12%;
+      bottom: -2%;
+      height: 38%;
+      border-top-left-radius: 58% 56%;
+      border-top-right-radius: 42% 58%;
+      background:
+        radial-gradient(86% 68% at 18% 20%, rgba(169, 220, 255, 0.34), transparent 28%),
+        linear-gradient(180deg, var(--blue-a) 0%, var(--blue-b) 58%, var(--blue-c) 100%);
+      transform-origin: center bottom;
+      will-change: transform;
+    }
+
+    .bars {
+      position: absolute;
+      inset: 0;
+    }
+
+    .bar {
+      position: absolute;
+      height: 12px;
+      border-radius: 999px;
+      left: 14%;
+      background: rgba(255,255,255,0.88);
+    }
+
+    .bar.b1 {
+      top: 24%;
+      width: 66%;
+    }
+
+    .bar.b2 {
+      top: 42%;
+      width: 46%;
+    }
+
+    .bar.b3 {
+      top: 60%;
+      width: 58%;
+    }
+
+    .chip {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 78px;
+      height: 78px;
+      transform: translate(-50%, -50%);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 30% 24%, rgba(255,255,255,0.12), transparent 30%),
+        linear-gradient(180deg, rgba(18, 28, 54, 0.96), rgba(7, 12, 24, 1));
+      border: 1px solid rgba(86, 140, 255, 0.34);
+      will-change: transform, opacity;
+    }
+
+    .chip::before,
+    .chip::after {
+      content: "";
+      position: absolute;
+      background: rgba(255,255,255,0.9);
+      border-radius: 999px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .chip::before {
+      width: 34px;
+      height: 8px;
+    }
+
+    .chip::after {
+      width: 8px;
+      height: 34px;
+    }
+
+    .badge {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 110px;
+      height: 34px;
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      background: rgba(248, 251, 255, 0.96);
+      border: 1px solid rgba(166, 184, 224, 0.34);
+      will-change: transform, opacity;
+    }
+
+    .badge::before {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ff7fd7 0%, #7048ff 100%);
+    }
+
+    .coin {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 84px;
+      height: 84px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 24%, rgba(255,255,255,0.22), transparent 22%),
+        linear-gradient(180deg, #ffcb68 0%, #d3851a 100%);
+      will-change: transform, opacity;
+    }
+
+    .coin::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      transform: translate(-50%, -50%) rotate(45deg);
+      background: rgba(49, 27, 0, 0.82);
+      border-radius: 4px;
+    }
+
+    .ring-pack {
+      position: absolute;
+      inset: 0;
+      will-change: transform, opacity;
+    }
+
+    .ring-core {
+      position: absolute;
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: 2px solid rgba(95, 145, 255, 0.42);
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .ring-dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ffffff;
+    }
+
+    .orbit {
+      position: absolute;
+      inset: 0;
+      will-change: transform;
+    }
+
+    .orbit-dot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      margin-left: -7px;
+      margin-top: -7px;
+      border-radius: 50%;
+      background: #ffffff;
+      will-change: transform;
+    }
+
+    .portrait {
+      position: absolute;
+      left: 9%;
+      right: 9%;
+      bottom: 10%;
+      height: 60%;
+      border-radius: 22px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 14%, rgba(255,255,255,0.16), transparent 24%),
+        linear-gradient(180deg, rgba(244,247,252,0.96) 0%, rgba(208,218,237,0.74) 28%, rgba(96,111,140,0.34) 54%, rgba(17,21,32,0.24) 100%);
+      will-change: transform, opacity;
+    }
+
+    .portrait::before {
+      content: "";
+      position: absolute;
+      width: 34%;
+      height: 16%;
+      left: 50%;
+      top: 10%;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #dfb288 0%, #cb9b73 100%);
+    }
+
+    .portrait::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 22%;
+      transform: translateX(-50%);
+      width: 44%;
+      height: 46%;
+      border-radius: 48% 48% 36% 36%;
+      background:
+        radial-gradient(circle at 50% 10%, #20242b 0 28%, transparent 29%),
+        linear-gradient(180deg, #f2f5f9 0%, #ccd7e5 40%, #90a2bc 100%);
+    }
+
+    .asset-image {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 12%;
+    }
+
+    .asset-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .asset-html {
+      position: absolute;
+      inset: 0;
+    }
+
+    @media (max-width: 420px) {
+      .deck {
+        width: 92vw;
+      }
+
+      .card-c {
+        left: 18%;
+        width: 64%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="back-orb"></div>
+    <div class="frame"></div>
+    <div class="spark"></div>
+
+    <div class="deck">
+      <article class="card dark card-a" id="cardA">
+        <div class="slot"><div class="slot-inner"></div></div>
+      </article>
+
+      <article class="card light card-b" id="cardB">
+        <div class="slot"><div class="slot-inner"></div></div>
+      </article>
+
+      <article class="card light card-c" id="cardC">
+        <div class="slot"><div class="slot-inner"></div></div>
+      </article>
+    </div>
+  </div>
+
+  <script>
+    const CONFIG = {
+      autoPlay: true,
+      holdDuration: 1.8,
+      transitionDuration: 0.95,
+
+      cards: {
+        a: document.getElementById("cardA"),
+        b: document.getElementById("cardB"),
+        c: document.getElementById("cardC"),
+      },
+
+      states: [
+        {
+          a: { tone: "dark", asset: { type: "builtin", name: "wave" } },
+          b: { tone: "light", asset: { type: "builtin", name: "bars" } },
+          c: { tone: "light", asset: { type: "builtin", name: "portrait" } },
+        },
+        {
+          a: { tone: "dark", asset: { type: "builtin", name: "chip" } },
+          b: { tone: "light", asset: { type: "builtin", name: "badge" } },
+          c: { tone: "dark", asset: { type: "builtin", name: "ringPack" } },
+        },
+        {
+          a: { tone: "dark", asset: { type: "builtin", name: "wave" } },
+          b: { tone: "dark", asset: { type: "builtin", name: "orbitPack" } },
+          c: { tone: "dark", asset: { type: "builtin", name: "coin" } },
+        },
+        {
+          a: { tone: "dark", asset: { type: "builtin", name: "ringPack" } },
+          b: { tone: "light", asset: { type: "builtin", name: "bars" } },
+          c: { tone: "light", asset: { type: "builtin", name: "portrait" } },
+        }
+      ]
+    };
+
+    function setCardTone(card, tone) {
+      card.classList.toggle("dark", tone === "dark");
+      card.classList.toggle("light", tone === "light");
+    }
+
+    function builtInAsset(name) {
+      switch (name) {
+        case "wave":
+          return `
+            <div class="asset wave"></div>
+          `;
+
+        case "bars":
+          return `
+            <div class="asset bars">
+              <div class="bar b1"></div>
+              <div class="bar b2"></div>
+              <div class="bar b3"></div>
+            </div>
+          `;
+
+        case "chip":
+          return `<div class="asset chip"></div>`;
+
+        case "badge":
+          return `<div class="asset badge"></div>`;
+
+        case "coin":
+          return `<div class="asset coin"></div>`;
+
+        case "portrait":
+          return `<div class="asset portrait"></div>`;
+
+        case "ringPack":
+          return `
+            <div class="asset ring-pack">
+              <div class="ring-core"></div>
+              <div class="ring-dot" style="left:22%;top:24%;"></div>
+              <div class="ring-dot" style="right:22%;top:30%;"></div>
+              <div class="ring-dot" style="left:34%;bottom:22%;"></div>
+            </div>
+          `;
+
+        case "orbitPack":
+          return `
+            <div class="asset orbit">
+              <div class="ring-core"></div>
+              <div class="orbit-dot d1"></div>
+              <div class="orbit-dot d2"></div>
+              <div class="orbit-dot d3"></div>
+            </div>
+          `;
+
+        default:
+          return ``;
+      }
+    }
+
+    function imageAsset(src, fit = "contain") {
+      return `
+        <div class="asset asset-image">
+          <img src="${src}" alt="" style="object-fit:${fit};" />
+        </div>
+      `;
+    }
+
+    function htmlAsset(html) {
+      return `<div class="asset asset-html">${html}</div>`;
+    }
+
+    function renderAsset(asset) {
+      if (!asset) return "";
+
+      if (asset.type === "builtin") {
+        return builtInAsset(asset.name);
+      }
+
+      if (asset.type === "image") {
+        return imageAsset(asset.src, asset.fit || "contain");
+      }
+
+      if (asset.type === "html") {
+        return htmlAsset(asset.html || "");
+      }
+
+      return "";
+    }
+
+    function applyState(index) {
+      const state = CONFIG.states[index % CONFIG.states.length];
+
+      Object.entries(state).forEach(([key, item]) => {
+        const card = CONFIG.cards[key];
+        const slotInner = card.querySelector(".slot-inner");
+
+        setCardTone(card, item.tone);
+        slotInner.innerHTML = renderAsset(item.asset);
+
+        if (item.asset?.name === "orbitPack") {
+          gsap.set(slotInner.querySelector(".d1"), { x: 0, y: -34 });
+          gsap.set(slotInner.querySelector(".d2"), { x: 30, y: 17 });
+          gsap.set(slotInner.querySelector(".d3"), { x: -30, y: 17 });
+        }
+      });
+    }
+
+    function animateStateIn() {
+      const tl = gsap.timeline();
+
+      tl.fromTo(".card-a",
+        { x: -12, y: 10, rotation: -3, scale: 0.975, opacity: 0 },
+        { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, duration: 0.9, ease: "power3.out" },
+        0
+      );
+
+      tl.fromTo(".card-b",
+        { x: 12, y: -10, rotation: 3, scale: 0.975, opacity: 0 },
+        { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, duration: 0.95, ease: "power3.out" },
+        0.03
+      );
+
+      tl.fromTo(".card-c",
+        { y: 16, rotation: -1.25, scale: 0.978, opacity: 0 },
+        { y: 0, rotation: 0, scale: 1, opacity: 1, duration: 1.0, ease: "power3.out" },
+        0.08
+      );
+
+      tl.fromTo(".slot-inner",
+        { y: 6, scale: 0.985, opacity: 0 },
+        { y: 0, scale: 1, opacity: 1, duration: 0.8, stagger: 0.03, ease: "power2.out" },
+        0.14
+      );
+
+      const waves = document.querySelectorAll(".wave");
+      if (waves.length) {
+        tl.fromTo(waves,
+          { yPercent: 10, scaleY: 0.9 },
+          { yPercent: 0, scaleY: 1, duration: 0.85, ease: "power2.out" },
+          0.14
+        );
+      }
+
+      const focusables = document.querySelectorAll(".chip, .badge, .coin, .portrait, .ring-pack, .orbit, .bar");
+      if (focusables.length) {
+        tl.fromTo(focusables,
+          { y: 6, scale: 0.985, opacity: 0 },
+          { y: 0, scale: 1, opacity: 1, duration: 0.72, stagger: 0.015, ease: "power2.out" },
+          0.18
+        );
+      }
+
+      return tl;
+    }
+
+    function transitionTo(nextIndex) {
+      const tl = gsap.timeline();
+
+      tl.to(".card-a", {
+        x: -8,
+        y: 7,
+        rotation: -2.2,
+        scale: 0.985,
+        opacity: 0,
+        duration: 0.34,
+        ease: "power2.in"
+      }, 0);
+
+      tl.to(".card-b", {
+        x: 8,
+        y: -7,
+        rotation: 2.2,
+        scale: 0.985,
+        opacity: 0,
+        duration: 0.34,
+        ease: "power2.in"
+      }, 0.02);
+
+      tl.to(".card-c", {
+        y: 10,
+        scale: 0.986,
+        opacity: 0,
+        duration: 0.38,
+        ease: "power2.in"
+      }, 0.04);
+
+      tl.add(() => applyState(nextIndex), 0.42);
+      tl.add(animateStateIn(), 0.42);
+
+      return tl;
+    }
+
+    function startAmbientMotion() {
+      gsap.to(".back-orb", {
+        scale: 1.045,
+        duration: 3.2,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+
+      gsap.to(".frame", {
+        scale: 1.01,
+        opacity: 0.92,
+        duration: 2.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+
+      gsap.to(".spark", {
+        y: -3,
+        rotation: 3,
+        duration: 1.05,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+
+      gsap.to(".card-a", {
+        y: -4,
+        duration: 3.4,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+
+      gsap.to(".card-b", {
+        y: 4.5,
+        duration: 3.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+
+      gsap.to(".card-c", {
+        y: -5.5,
+        duration: 3.55,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+
+      document.querySelectorAll(".orbit").forEach((orbit) => {
+        gsap.to(orbit, {
+          rotation: 360,
+          duration: 10,
+          repeat: -1,
+          ease: "none",
+          transformOrigin: "50% 50%"
+        });
+      });
+    }
+
+    function startSequence() {
+      applyState(0);
+      animateStateIn();
+      startAmbientMotion();
+
+      if (!CONFIG.autoPlay) return;
+
+      const master = gsap.timeline({ repeat: -1, repeatDelay: 0.2 });
+
+      for (let i = 1; i < CONFIG.states.length; i++) {
+        master.add(`hold-${i}`, `+=${CONFIG.holdDuration}`);
+        master.add(transitionTo(i), `hold-${i}`);
+      }
+
+      master.add("hold-reset", `+=${CONFIG.holdDuration}`);
+      master.add(transitionTo(0), "hold-reset");
+    }
+
+    startSequence();
+
+    /*
+      SWAPPABLE / DYNAMIC USAGE
+
+      1. Built-in assets:
+         CONFIG.states[0].a.asset = { type: "builtin", name: "chip" }
+
+      2. External image:
+         CONFIG.states[0].b.asset = {
+           type: "image",
+           src: "https://your-cdn.com/asset.png",
+           fit: "contain"
+         }
+
+      3. Custom HTML:
+         CONFIG.states[1].c.asset = {
+           type: "html",
+           html: `
+             <div style="
+               position:absolute;
+               inset:18%;
+               border-radius:24px;
+               background:linear-gradient(180deg,#1c4fff,#5cc2ff);
+             "></div>
+           `
+         }
+
+      4. Tone per card:
+         tone: "dark" or "light"
+
+      This means each card is now a proper dynamic slot.
+    */
+  </script>
+</body>
+</html>
