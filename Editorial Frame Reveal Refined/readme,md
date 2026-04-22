@@ -1,0 +1,20 @@
+
+A premium cinematic GSAP motion beat built for editorial-style portrait reveals, luxury branding intros, and authority-driven visual storytelling.
+
+This animation is part of the larger GSAP animation system designed for retrieval-ready motion infrastructure.
+
+It is not just a snippet.
+
+It is a reusable motion object prepared for future semantic retrieval, vector embedding, and agent-driven composition inside the broader Prometheus motion intelligence system.
+
+---
+
+# Folder Structure
+
+```text
+editorial-frame-luxury-reveal/
+│
+├── index.html
+├── metadata.json
+├── notes.md
+└── preview.png (optional)
